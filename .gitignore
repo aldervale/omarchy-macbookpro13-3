@@ -1,0 +1,34 @@
+# Local configuration, private diagnostics and Apple/device data
+*.local.*
+diagnostics/
+firmware/
+packages/
+EFI/
+FDRData*
+*.memboot
+*.img
+*.img.gz
+*.tar
+*.tar.gz
+*.pkg.tar.*
+*.log
+*.jsonl
+*.pem
+*.key
+
+# Upstream checkouts created while following the setup guide
+macbookpro-2016-2017-linux/
+snd_hda_macbookpro/
+t1-revive/
+
+# Kernel/Python build products
+*.o
+*.ko
+*.mod
+*.mod.c
+*.cmd
+Module.symvers
+modules.order
+.tmp_versions/
+__pycache__/
+*.pyc

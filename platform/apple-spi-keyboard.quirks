@@ -1,0 +1,7 @@
+# The applespi keyboard reports vendor 0x0000 on this MacBookPro13,3,
+# so the stock Apple SPI keyboard rule (vendor 0x05AC) does not match.
+[MacBook Apple SPI Keyboard]
+MatchName=Apple SPI Keyboard
+MatchUdevType=keyboard
+MatchBus=spi
+AttrKeyboardIntegration=internal
