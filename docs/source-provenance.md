@@ -43,3 +43,24 @@ recovery run. The installed host still uses the previously validated copy.
 hook. `install-touchbar.sh` is a smaller fresh-install/removal implementation;
 it omits migration of the retired runtime trial and refuses that state instead.
 Installer fixtures do not constitute a live deployment test.
+
+## Omarchy integration draft
+
+[Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894) now includes
+the sleep and Touch Bar recovery payload, the keyboard quirk, NVMe helper and
+full setup guide. Integration commit
+[`4c02255`](https://github.com/aldervale/omarchy/commit/4c02255)
+copies the payload from this repository at `ff11b52`, retaining GPL-2.0-only
+and a directory-local license.
+
+The EC module, DKMS configuration, s2idle policy and HID helper are unchanged.
+The Makefile drops a trailing blank line; shell shebangs follow Omarchy's
+convention. Runtime helpers use a new root-owned directory. One 119-line
+installer replaces the two separate installers (159 lines combined), installs
+an ordered controller/display drop-in and includes the sleep policy in removal.
+It refuses existing installations instead of migrating the working host.
+
+The expanded draft passes 34 isolated tests, the keyboard install/migration
+checks, Omarchy's CLI suite and syntax/unit checks. Its EC module builds with
+`W=1` against `7.2.5-3-omarchy`. The new combined installation has not had a
+physical hardware test, and the original working host hooks were not replaced.

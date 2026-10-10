@@ -33,12 +33,14 @@ The original source hashes and subsequent review changes are recorded in
 
 ## Upstream work
 
-This public guide gives other maintainers something to link to immediately.
-A future integration PR should provide an explicitly enabled `MacBookPro13,3`
-experimental option with model/peripheral guards, cleanup and rollback. It
-should keep a docked “ignore lid close” policy distinct from undocked suspend.
-Battery retention and external-port behavior need validation before making
-this workaround a default.
+The [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894)
+includes an explicitly enabled `MacBookPro13,3` sleep and Touch Bar recovery
+option, with model/peripheral guards, cleanup and removal. It also carries the
+keyboard quirk, NVMe helper and a guide connecting the Wi-Fi, audio and T1
+prerequisites. See [the contribution scope and validation](review.md).
+The new integration remains a draft: battery retention, external-port behavior
+and the combined installer need further hardware validation. Docked lid policy
+remains distinct from the undocked sleep workaround.
 
 The [optional Touch Bar recovery](touchbar.md) now works in our recorded short
 s2idle cycles. Driver-level integration remains a separate investigation, with

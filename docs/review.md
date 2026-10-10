@@ -120,21 +120,47 @@ As checked for this review, related upstream work already exists:
 | T1 display resume | [T1Bridge #18](https://github.com/standardagents/t1bridge/issues/18) | Appropriate home for driver-level park/unpark evidence; models and sleep states have differing results |
 
 Our [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894)
-addresses the observed vendor-zero SPI
-keyboard: a model/device-scoped libinput quirk for internal-keyboard pairing,
-with an install leaf, migration and isolated regression checks. Personal focus
-policy is kept in user configuration. It is a draft pending extended typing
-validation, not a claim that it fixes every accidental click.
+covers the complete MacBookPro13,3 setup, including code for the sleep and
+Touch Bar workarounds. Its scope is:
+
+| Component | Proposed Omarchy contribution |
+| --- | --- |
+| Keyboard typing suppression | Model/device-scoped libinput quirk, hardware install leaf and migration |
+| Lid wake and suspend | EC wake module, guarded s2idle/Thunderbolt sequence, DKMS installation and removal |
+| Touch Bar after sleep | Validated one-write unpark sequence after successful controller cleanup |
+| Optional setup | `omarchy setup macbookpro13-3 check\|install\|remove`, with confirmation, a sleep inhibitor and one ordered systemd drop-in |
+| NVMe target correction | Included sysfs-based helper and explicit installation/rollback instructions; necessity of the setting remains unproven |
+| Wi-Fi, audio and T1 startup/recovery | Integrated guide with source versions, third-party prerequisites, ownership repair and firmware recovery boundaries |
+
+The combined installer replaces the separate sleep and Touch Bar installers
+for the proposed Omarchy integration. It also owns the s2idle policy, refuses
+existing or competing installations and checks effective recovery order and
+sleep settings. The copied recovery payload retains GPL-2.0-only, with its own
+license and provenance. The keyboard quirk is eligible for normal installation;
+the experimental sleep sequence requires an explicit opt-in and is never
+enabled by the migration.
+
+The draft does not automatically run third-party Wi-Fi, audio or firmware
+installers. These remain documented setup dependencies. Personal focus policy
+stays in user configuration; the keyboard quirk does not fix every accidental
+physical click.
 
 The stock libinput database returned no keyboard-integration quirk in an
 explicit `--data-dir /usr/share/libinput` query; the candidate returned
 `AttrKeyboardIntegration=internal`. Both queries excluded local overrides.
-The focused installation/migration fixture and quirk parser checks pass.
-The complete Omarchy test run passed its CLI suite but reported 19 failures
+The focused keyboard installation/migration fixture and quirk parser checks
+pass. The expanded draft also passes 34 recovery, installer, CLI-dispatch and
+NVMe-targeting tests, the Omarchy CLI suite, Bash syntax and systemd directive
+verification. Tests use isolated files and mocks; they do not suspend the host.
+
+The earlier complete Omarchy test run passed its CLI suite but reported 19 failures
 among 370 shell test files, plus headless skips. Missing companion package
 sources and sandbox/UI restrictions affected that run; one socket-related
 failure passed outside the sandbox. The draft does not claim a green full suite.
 
-The broader suspend workaround stays here as an opt-in experiment. It refuses
-docked suspend, has slow wake and lacks battery-retention validation; silently
-installing it for all T1 Macs would exceed the evidence.
+The underlying sequence has the recorded physical results; the new combined
+installer still needs an attended hardware installation test. The installed
+working hooks on the owner's machine were not replaced by this contribution.
+The draft remains open for that validation, extended typing and battery tests,
+and maintainer review. About 13-second wake and undocked-only operation remain
+explicit limitations; no faster wake or improved battery result is claimed.
