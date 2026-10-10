@@ -119,11 +119,21 @@ As checked for this review, related upstream work already exists:
 | BCM43602 5 GHz board file | [#7671](https://github.com/omacom/omarchy/pull/7671) | Open; availability of a PR does not mean the fix ships |
 | T1 display resume | [T1Bridge #18](https://github.com/standardagents/t1bridge/issues/18) | Appropriate home for driver-level park/unpark evidence; models and sleep states have differing results |
 
-Our prepared Omarchy contribution addresses the observed vendor-zero SPI
+Our [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894)
+addresses the observed vendor-zero SPI
 keyboard: a model/device-scoped libinput quirk for internal-keyboard pairing,
 with an install leaf, migration and isolated regression checks. Personal focus
 policy is kept in user configuration. It is a draft pending extended typing
 validation, not a claim that it fixes every accidental click.
+
+The stock libinput database returned no keyboard-integration quirk in an
+explicit `--data-dir /usr/share/libinput` query; the candidate returned
+`AttrKeyboardIntegration=internal`. Both queries excluded local overrides.
+The focused installation/migration fixture and quirk parser checks pass.
+The complete Omarchy test run passed its CLI suite but reported 19 failures
+among 370 shell test files, plus headless skips. Missing companion package
+sources and sandbox/UI restrictions affected that run; one socket-related
+failure passed outside the sandbox. The draft does not claim a green full suite.
 
 The broader suspend workaround stays here as an opt-in experiment. It refuses
 docked suspend, has slow wake and lacks battery-retention validation; silently
