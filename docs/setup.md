@@ -101,7 +101,7 @@ and limitations before installing. Our durable source location was
 git clone https://github.com/davidjo/snd_hda_macbookpro.git
 git -C snd_hda_macbookpro checkout 89b22ff90b86468b186706861dd18663562defa7
 sudo install -d /usr/local/src/snd_hda_macbookpro
-sudo cp -a snd_hda_macbookpro/. /usr/local/src/snd_hda_macbookpro/
+sudo cp -a --no-preserve=ownership snd_hda_macbookpro/. /usr/local/src/snd_hda_macbookpro/
 cd /usr/local/src/snd_hda_macbookpro
 sudo ./install.cirrus.driver.sh -i
 ```
@@ -112,6 +112,21 @@ rebuild the Omarchy boot image after the kernel-module changes, and reboot.
 Test speakers through PipeWire at low volume. Speaker playback was confirmed;
 microphone and headphone switching were not separately tested here. Use the
 upstream removal instructions for the installed revision when reverting.
+
+The durable source tree must be root-owned and not writable by ordinary users:
+DKMS executes its build scripts as root on later kernel updates. Earlier
+versions of this guide used `cp -a`, which preserved the checkout's user
+ownership. If you followed that version, inspect the tree and the DKMS source
+link, then repair the ownership:
+
+```bash
+readlink -f /usr/src/snd_hda_macbookpro-0.1
+sudo chown -hR root:root /usr/local/src/snd_hda_macbookpro
+sudo chmod -R go-w /usr/local/src/snd_hda_macbookpro
+```
+
+These commands assume that exact dedicated source directory. They do not
+reinstall or reload the running audio driver.
 
 ## 4. Correct the NVMe suspend service target if needed
 
@@ -212,15 +227,21 @@ legacy `appleibridge` stack or competing configuration-selector services.
 ## 7. Optional sleep and keyboard work
 
 Only after startup hardware works, read [sleep.md](sleep.md) to decide whether
-the experimental undocked workaround suits your use. It still has slow wake,
-dark Touch Bar display after resume and unresolved battery retention.
+the experimental undocked workaround suits your use. It still has slow wake
+and unresolved battery retention. The separate [Touch Bar hook](touchbar.md)
+recovers the display in our recorded short cycles, including after a reboot.
 
 The optional `platform/apple-spi-keyboard.quirks` marks the SPI keyboard as
 internal because ours reported vendor `0000` and missed libinput's stock Apple
 rule. That may improve disabling the touchpad while typing. Merge this stanza
 into `/etc/libinput/local-overrides.quirks` rather than replacing other quirks,
 validate it with `libinput quirks validate`, and test after a new graphical
-login. We verified rule matching; physical typing suppression remains unconfirmed.
+login. We verified rule matching; the owner reports much better behavior with
+occasional focus changes. `input.follow_mouse = 1` had been re-enabled locally;
+we restored `0` on October 9 so pointer motion cannot ordinarily steal keyboard
+focus. Natural scrolling and `disable_while_typing = true` remain enabled.
+This is a personal focus preference, separate from the device classification
+fix. Extended typing validation is still needed. See [the review](review.md).
 
 We did not add `pcie_ports=compat`, change GPU selection, install a replacement
 kernel or apply a T2-specific display recipe. This guide describes the working

@@ -5,10 +5,10 @@ with Touch Bar and the Apple T1 chip** into daily use with Omarchy. It connects
 existing community projects with our model-specific repair work and shares the
 experimental lid-wake workaround.
 
-**Current limitations: opening the lid generally wakes the laptop in about
-10–15 seconds; the Touch Bar lights after startup but stays dark after sleep,
-although its touch zones still respond. The battery has also run flat while
-the lid was closed for a couple of days. Low-power sleep is unresolved.**
+**Touch Bar recovery now works in four owner-confirmed lid cycles, including
+one after a full reboot, using the optional guarded unpark hook. Wake still
+takes about 13 seconds. The battery previously ran flat with the lid closed
+for a couple of days; low-power sleep remains unresolved.**
 
 This is a record of progress on one machine, with reproducible source and
 instructions. It is not a complete suspend/resume fix or a general installer
@@ -18,13 +18,13 @@ for other MacBook models.
 
 | Feature | Observed result | Remaining limitation |
 | --- | --- | --- |
-| Keyboard and trackpad | Working with the kernel's `applespi` | Typing-suppression quirk needs physical verification |
+| Keyboard and trackpad | Working with in-tree `applespi`; internal-keyboard quirk matches | Occasional focus changes reported; click-to-focus restored, awaiting extended typing check |
 | Wi-Fi | Working; 5 GHz association and both bands visible after board NVRAM installation | Internet routing was not separately isolated from Ethernet |
 | Speakers | Working after CS8409 community driver installation | Microphone and headphone switching not separately tested |
 | T1 firmware at startup | Recovered with `t1-revive`; survives a full shutdown/power-on | Keep a verified backup off this disk |
 | Touch Bar after startup | Display lights and controls work with T1Bridge | Startup success does not establish sleep recovery |
-| Touch Bar after sleep | **Display stays dark; touch zones still respond** | Renderer and hardware-service restarts did not establish a working recovery |
-| Lid-open wake | Generally working with the EC helper and Thunderbolt workaround | **Roughly 10–15 seconds to a usable screen, not instant** |
+| Touch Bar after sleep | **Display and Fn recover with the optional unpark hook** | Four automatic recoveries on one machine; long sleeps remain unvalidated |
+| Lid-open wake | Working in recorded cycles with the EC helper and Thunderbolt workaround | **About 13 seconds in two recent owner timings** |
 | USB-C/Thunderbolt controllers after sleep | Driver bindings recovered in recorded undocked cycles | External port functionality and docked sleep are unvalidated |
 | Battery retention with lid closed | **Unresolved; battery ran flat over a couple of days** | Missed suspend, unexpected wake and sleep power draw have not been distinguished |
 | Camera | Detected by the driver | Capture untested here |
@@ -47,10 +47,15 @@ periods and transport.
    correction, conditional T1 firmware recovery and T1Bridge.
 2. Read [the experimental sleep instructions](docs/sleep.md) before installing
    the optional EC module and suspend hooks. They include removal instructions.
+   Then see [Touch Bar recovery](docs/touchbar.md) for the separate display hook.
 3. Use [the validation guide](docs/validation.md) to measure wake time, Touch Bar
    behavior and battery loss. Hardware results and software checks are separate.
 4. Consult [diagnostics](docs/diagnostics.md) for a small status report and local
    log commands.
+
+The [October review](docs/review.md) records an audio-source ownership repair,
+installer hardening, the touchpad review, wake experiments still needing an
+attended test, and the upstream contribution plan.
 
 Clone this repository:
 
@@ -97,7 +102,8 @@ that the same commands work unchanged on a future kernel.
   same-model reports that informed the EC wake and Thunderbolt experiments.
 
 Our additions are the measured `13,3` results, guarded suspend sequence, EC
-wake-capability module, NVMe target correction and keyboard integration quirk.
+wake-capability module, Touch Bar recovery integration, NVMe target correction
+and keyboard integration quirk.
 See [credits and integration notes](docs/credits.md) and
 [source provenance](docs/source-provenance.md).
 
@@ -106,7 +112,7 @@ See [credits and integration notes](docs/credits.md) and
 Please include the model, software versions, connected peripherals, wake time,
 Touch Bar display **and** input results, and measured battery loss in hardware
 reports. See [CONTRIBUTING.md](CONTRIBUTING.md). The next priorities are battery
-retention, Touch Bar display recovery, then wake speed and broader validation.
+retention, faster wake and broader validation of Touch Bar recovery.
 
 Repository code and documentation are GPL-2.0-only; see [LICENSE](LICENSE).
 Referenced projects retain their own licenses. Apple firmware, device restore

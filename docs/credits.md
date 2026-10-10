@@ -28,7 +28,7 @@ Inspect the upstream installer and disable conflicting components first.
 
 No donor firmware or compiled upstream drivers are bundled. The Wi-Fi template
 and audio/recovery projects are obtained from their original repositories.
-The nine selected local repair sources retain the hashes recorded in
+The original source hashes and subsequent review changes are recorded in
 [source-provenance.md](source-provenance.md).
 
 ## Upstream work
@@ -40,6 +40,7 @@ should keep a docked “ignore lid close” policy distinct from undocked suspen
 Battery retention and external-port behavior need validation before making
 this workaround a default.
 
-Touch Bar display recovery remains a separate investigation, with related
-reports in [T1Bridge issue #18](https://github.com/standardagents/t1bridge/issues/18).
+The [optional Touch Bar recovery](touchbar.md) now works in our recorded short
+s2idle cycles. Driver-level integration remains a separate investigation, with
+related reports in [T1Bridge issue #18](https://github.com/standardagents/t1bridge/issues/18).
 A report on another model/sleep state is a comparison, not a diagnosis here.

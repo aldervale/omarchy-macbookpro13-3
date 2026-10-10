@@ -8,8 +8,10 @@ establish battery retention, panel illumination or reliable physical resume.
 From the root, without administrator privileges:
 
 ```bash
-bash -n install-persistent-sleep.sh persistent-sleep/macbook-suspend \
-  platform/macbook-nvme-suspend-fix scripts/status.sh
+for script in install-persistent-sleep.sh persistent-sleep/macbook-suspend \
+  platform/macbook-nvme-suspend-fix scripts/status.sh install-touchbar.sh touchbar/resume; do
+  bash -n "$script" || break
+done
 python3 -m unittest discover -s tests -v
 ```
 
@@ -32,6 +34,13 @@ tests, a `W=1` module build and local document-link checks. The published helper
 installer and EC source matched the original repair copies byte-for-byte.
 The copied installer was not run against the live machine during publication.
 
+The October 9–10 review passed 28 isolated tests covering the existing sleep
+helper, Touch Bar report validation and single-write behavior, opened-device
+identity checks, resume guards, installer rollback and manifest/state refusal.
+Six shell files passed individual `bash -n` checks. The published Touch Bar
+sysfs-only preflight passed on this host without opening a device node. These
+checks do not replace a fresh hardware test of the new installer/readback check.
+
 ## Short attended lid test
 
 1. Save work, start from a healthy boot and disconnect all peripherals except
@@ -46,9 +55,12 @@ The copied installer was not run against the live machine during publication.
 5. Inspect the local logs for actual `s2idle` entry/exit and completed cleanup.
    Repeat on mains and battery, including after a fresh boot.
 
-Current expected limitation: about **10–15 seconds** visible wake and a **dark
-Touch Bar display after resume despite responding touch zones**. Record any
-change from that behavior, rather than calling the whole cycle successful.
+With the optional Touch Bar hook, the display and Fn recovered automatically
+in four owner-confirmed cycles, including one after a full reboot. Two recent
+owner timings were **13 seconds** to visible wake. Without that hook, the
+display remained dark despite working touch input. Record the actual behavior
+and the installed helper revision; long sleeps and battery retention are still
+unvalidated.
 
 ## Battery retention test
 

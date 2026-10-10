@@ -12,10 +12,11 @@ dropin=/etc/systemd/system/systemd-suspend.service.d/60-macbook-thunderbolt-tria
 manifest=/var/lib/macbook-repair/persistent-sleep-files.sha256
 files=("$src/Makefile" "$src/macbook_ec_wake_trial.c" "$src/dkms.conf" "$helper" "$dropin")
 
-if systemctl is-active --quiet systemd-suspend.service ||
-   [[ -d /run/macbook-suspend/state || -d /run/macbook-suspend-trial/state ]]; then
-  echo 'Suspend or pending recovery is active; stopping.' >&2; exit 1
-fi
+active=$(systemctl show systemd-suspend.service -p ActiveState --value)
+[[ $active == inactive && ! -e /run/macbook-suspend/state &&
+   ! -e /run/macbook-suspend-trial/state ]] || {
+  echo 'Suspend must be inactive with no pending recovery; stopping.' >&2; exit 1;
+}
 
 case ${1:-install} in
   install)
@@ -69,8 +70,9 @@ case ${1:-install} in
     echo "Rollback: sudo bash $base/install-persistent-sleep.sh remove; then reboot."
     ;;
   remove)
-    [[ -f $manifest ]] || { echo 'Installation manifest is missing; stopping.' >&2; exit 1; }
-    sha256sum --check "$manifest"
+    [[ -f $manifest && ! -L $manifest ]] || { echo 'Installation manifest is missing; stopping.' >&2; exit 1; }
+    current=$(sha256sum "${files[@]}")
+    [[ $current == "$(<"$manifest")" ]] || { echo 'Installed files changed; refusing removal.' >&2; exit 1; }
     unlink "$dropin"
     systemctl daemon-reload
     dkms remove -m "$package" -v "$version" --all

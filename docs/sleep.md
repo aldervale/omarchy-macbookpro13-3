@@ -1,8 +1,8 @@
 # Experimental undocked sleep workaround
 
-**Expect roughly 10–15 seconds to wake. The Touch Bar lights at startup but
-its display stays dark after resume, while touch input still responds. Battery
-retention is unresolved.** This is an optional partial workaround for
+**Expect about 13 seconds to wake. Touch Bar display recovery requires the
+separate [unpark hook](touchbar.md). Battery retention is unresolved.**
+This is an optional partial workaround for
 `MacBookPro13,3`, tested on `7.2.5-3-omarchy`.
 
 ## What it does
@@ -41,13 +41,14 @@ Choosing `s2idle` does not establish acceptable power draw.
   module build and new hardware validation.
 - A competing suspend hook, alternate sleep policy or custom lid handling needs
   review before installing. Suspend refusal can leave a closed laptop awake.
-- A reboot/shutdown is currently the confirmed way to return to the working
-  startup state. Service restarts did not establish Touch Bar illumination recovery.
+- The optional Touch Bar hook restores illumination in our recorded cycles.
+  Service restarts alone did not relight the display.
 
 ## Install on a clean setup
 
 Read `install-persistent-sleep.sh` and the helper first. The installer is the
-same source used on our machine, without an automatic reinstall/upgrade mode.
+tested source with stricter inactive-state and removal-manifest checks, without
+an automatic reinstall/upgrade mode.
 It refuses to overwrite existing target files. If you already have this
 workaround installed, keep it and compare versions instead of reinstalling.
 
@@ -111,6 +112,8 @@ recovered. Follow [validation.md](validation.md) before longer battery tests.
 From the repository root:
 
 ```bash
+# If the optional Touch Bar hook was installed, remove it first:
+sudo bash install-touchbar.sh remove
 sudo bash install-persistent-sleep.sh remove
 ```
 

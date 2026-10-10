@@ -1,7 +1,7 @@
 # Contributing
 
-Hardware reports are welcome, especially for battery retention, Touch Bar
-display recovery and wake timing on `MacBookPro13,3`. Follow
+Hardware reports are welcome, especially for battery retention, repeatability
+of Touch Bar recovery and wake timing on `MacBookPro13,3`. Follow
 [the validation guide](docs/validation.md) and include:
 
 - Model, kernel and relevant package versions.

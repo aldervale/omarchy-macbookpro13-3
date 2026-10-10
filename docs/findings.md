@@ -4,6 +4,25 @@ This chronology summarizes our local repair notes and the owner's observations.
 It contains no raw journals, machine identifiers, restore transcripts or
 firmware. Times are approximate where the owner reported them.
 
+## Update: Touch Bar recovery confirmed, October 9
+
+The earlier dark-after-resume limitation below is superseded for the tested
+configuration. One report-3 unpark restored illumination and Fn in two manual
+tests. The automatic hook then recovered the display in four owner-confirmed
+lid cycles, including one after a full reboot. The last two owner-timed wakes
+were about 13 seconds each. See [the implementation and scope](touchbar.md).
+
+Corresponding kernel traces measured 12,684.043 and 12,690.102 ms in noirq
+resume. The two upstream bridge callbacks took 6,242.186 + 6,242.833 ms and
+6,246.280 + 6,244.691 ms respectively. The complete Touch Bar hook took 0.738
+and 0.739 seconds; its writes took 11.9 and 12.1 ms. Different timing boundaries
+mean these numbers should not be added to the owner's estimates.
+
+No SOCW call, USB reset, driver replacement or firmware regeneration was used
+to recover the panel. Longer sleeps, battery retention and external port
+function remain unvalidated. The [October review](review.md) records subsequent
+security, focus and upstream work separately from physical sleep validation.
+
 ## Startup hardware, September 27
 
 The initial Omarchy installation had missing T1 firmware, weak/unconfigured

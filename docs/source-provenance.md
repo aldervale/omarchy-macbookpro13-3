@@ -1,8 +1,9 @@
 # Source provenance
 
-These nine files were copied byte-for-byte from the tested local repair work on
-2026-10-09. Paths in the middle column are relative to the private repair directory;
-that directory is not part of this repository. No installed host file was changed.
+The initial publication at commit `636250c` copied these nine files byte-for-byte
+from the tested local repair work on 2026-10-09. The hashes below describe that
+initial publication, not later revisions. Paths in the middle column are
+relative to the private repair directory; that directory is not published.
 
 | Repository file | Repair source | SHA-256 |
 | --- | --- | --- |
@@ -23,3 +24,22 @@ The s2idle configuration, diagnostic script and isolated tests were prepared for
 this public repository. Validation of those files is recorded in
 [validation.md](validation.md). Firmware, NVRAM containing a host MAC address,
 packages, raw journals and T1 restore data are not included.
+
+## October 9–10 review changes
+
+`install-persistent-sleep.sh` now requires a successful inactive-state query
+and compares the removal manifest against the expected file list. Its hash
+therefore differs from the original above; the installed sleep helper and EC
+module are unchanged.
+
+`touchbar/unpark.py` derives from the physically tested private
+`unpark-touchbar-once.py`. Device discovery, descriptor checks, ioctl values,
+single-write payload and timing are unchanged. Besides public wording, the
+published version adds a failure result if readback still reports parked.
+That additional negative-path check is tested with mocks, not a new physical
+recovery run. The installed host still uses the previously validated copy.
+
+`touchbar/resume` and its drop-in are copied from the validated persistent
+hook. `install-touchbar.sh` is a smaller fresh-install/removal implementation;
+it omits migration of the retired runtime trial and refuses that state instead.
+Installer fixtures do not constitute a live deployment test.
