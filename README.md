@@ -56,9 +56,11 @@ periods and transport.
 The [October review](docs/review.md) records an audio-source ownership repair,
 installer hardening, the touchpad review, wake experiments still needing an
 attended test, and [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894).
-The draft includes the sleep and Touch Bar recovery code, keyboard quirk, NVMe
-helper and an integrated guide to the full setup. Its combined installer is
-fixture-tested; it still needs an attended hardware installation test.
+The existing draft contains the earlier combined proposal. Separate keyboard,
+sleep and dependent Touch Bar contributions are now prepared locally, with a
+companion keyboard packaging change. New submissions are held until the full
+test gate passes; the review records the current upstream test blockers.
+The split installers also need attended hardware validation.
 
 Clone this repository:
 

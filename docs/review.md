@@ -119,48 +119,32 @@ As checked for this review, related upstream work already exists:
 | BCM43602 5 GHz board file | [#7671](https://github.com/omacom/omarchy/pull/7671) | Open; availability of a PR does not mean the fix ships |
 | T1 display resume | [T1Bridge #18](https://github.com/standardagents/t1bridge/issues/18) | Appropriate home for driver-level park/unpark evidence; models and sleep states have differing results |
 
-Our [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894)
-covers the complete MacBookPro13,3 setup, including code for the sleep and
-Touch Bar workarounds. Its scope is:
+Our existing [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894) contains the earlier combined proposal. It remains a draft at `4c02255`. The next revision is being prepared as atomic contributions, with no new submissions or pushes until the test gate passes:
 
-| Component | Proposed Omarchy contribution |
+| Contribution | Scope and dependency |
 | --- | --- |
-| Keyboard typing suppression | Model/device-scoped libinput quirk, hardware install leaf and migration |
-| Lid wake and suspend | EC wake module, guarded s2idle/Thunderbolt sequence, DKMS installation and removal |
-| Touch Bar after sleep | Validated one-write unpark sequence after successful controller cleanup |
-| Optional setup | `omarchy setup macbookpro13-3 check\|install\|remove`, with confirmation, a sleep inhibitor and one ordered systemd drop-in |
-| NVMe target correction | Included sysfs-based helper and explicit installation/rollback instructions; necessity of the setting remains unproven |
-| Wi-Fi, audio and T1 startup/recovery | Integrated guide with source versions, third-party prerequisites, ownership repair and firmware recovery boundaries |
+| Keyboard classification | A model/device-scoped libinput quirk in Omarchy; a companion settings-package change owns the database file. The proposed hardware installer and migration were removed. |
+| Lid wake and suspend | Optional EC wake module, guarded s2idle/Thunderbolt sequence, DKMS installation and removal; independent of the keyboard change. |
+| Touch Bar after sleep | Separate optional unpark hook and removal manifest; requires the sleep contribution and follows it in the merge order. |
+| NVMe target correction | Coordinate with existing PR #11624 instead of opening a duplicate. The setting's necessity on this Samsung-equipped model remains unproven. |
+| Wi-Fi, audio, T1 recovery and personal focus policy | Keep the complete setup and evidence in this repository. Firmware recovery and third-party driver installation are not automated by these contributions. |
 
-The combined installer replaces the separate sleep and Touch Bar installers
-for the proposed Omarchy integration. It also owns the s2idle policy, refuses
-existing or competing installations and checks effective recovery order and
-sleep settings. The copied recovery payload retains GPL-2.0-only, with its own
-license and provenance. The keyboard quirk is eligible for normal installation;
-the experimental sleep sequence requires an explicit opt-in and is never
-enabled by the migration.
+The three hardware fixes have separate review boundaries. Keyboard classification needs source and packaging changes in two repositories, so the plan has four related PRs. The static quirk matches only the observed model, SPI keyboard and vendor ID; shipping it through the settings package does not enable it on other hardware. It preserves administrator local overrides and avoids creating an unowned file under `/usr`. The source proposal shrank from 88 added lines to 37, including its tests.
 
-The draft does not automatically run third-party Wi-Fi, audio or firmware
-installers. These remain documented setup dependencies. Personal focus policy
-stays in user configuration; the keyboard quirk does not fix every accidental
-physical click.
+The sleep and Touch Bar installers own separate manifests and ordered drop-ins. The Touch Bar installer refuses a missing sleep dependency; sleep removal refuses an installed display hook. Fixtures exercise both actual installers together, including the correct removal order. A failed DKMS removal leaves the sleep installation intact so removal can be retried. The copied recovery payload retains GPL-2.0-only, with its own license and provenance. Neither sleep nor Touch Bar recovery is automatically enabled.
 
-The stock libinput database returned no keyboard-integration quirk in an
-explicit `--data-dir /usr/share/libinput` query; the candidate returned
-`AttrKeyboardIntegration=internal`. Both queries excluded local overrides.
-The focused keyboard installation/migration fixture and quirk parser checks
-pass. The expanded draft also passes 34 recovery, installer, CLI-dispatch and
-NVMe-targeting tests, the Omarchy CLI suite, Bash syntax and systemd directive
-verification. Tests use isolated files and mocks; they do not suspend the host.
+### Test gate and current blockers
 
-The earlier complete Omarchy test run passed its CLI suite but reported 19 failures
-among 370 shell test files, plus headless skips. Missing companion package
-sources and sandbox/UI restrictions affected that run; one socket-related
-failure passed outside the sandbox. The draft does not claim a green full suite.
+The atomic branches are based on Omarchy `77bfaca`. Keyboard matching and libinput parser validation pass. The sleep contribution passes 28 fixture tests; the Touch Bar contribution passes 20, including installation/removal of both components. The Omarchy CLI checks pass on the prepared hardware branches. The companion packaging fixture exercises both settings recipes on x86_64 and aarch64 with older sources and sources containing the new quirk; it passes. These tests use temporary files and mocks, not host suspend or device writes.
 
-The underlying sequence has the recorded physical results; the new combined
-installer still needs an attended hardware installation test. The installed
-working hooks on the owner's machine were not replaced by this contribution.
-The draft remains open for that validation, extended typing and battery tests,
-and maintainer review. About 13-second wake and undocked-only operation remain
-explicit limitations; no faster wake or improved battery result is claimed.
+A full run against **unchanged upstream** completed all 370 shell test files and the CLI suite. The CLI suite passed; ten shell files failed and 31 contained skipped checks. Seven of those failures subsequently passed unchanged in an appropriate clean environment: the original failures involved read-only fixture mounts, missing companion ISO sources, namespace ownership or system time-service access. Headless skips remain unexecuted coverage, not passes.
+
+Three source/packaging failures remain on that unchanged baseline:
+
+- `default-agent-test.sh` expects `mise unuse -g`, while the existing Grok migration calls `mise unuse -y -g`. A separate local assertion correction passes its focused test; it is not mixed into the hardware branches.
+- `passwordless-grant-lifecycle-test.sh` requires removal hooks missing from the current companion settings packages. [omarchy-pkgs PR #257](https://github.com/omacom/omarchy-pkgs/pull/257) proposes the related lifecycle work but is not merged into the tested package base.
+- `unowned-system-paths-test.sh` identifies USB/Thunderbolt polkit files that the current package recipes do not own. The earlier keyboard draft added another unowned path; the new package-owned design removes that regression. The four baseline polkit reports remain.
+
+These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`. No tests or ownership checks were disabled to obtain a passing result. The full suite is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
+
+The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The owner's installed working hooks were retained. Extended typing, battery retention and port functionality after wake remain unvalidated. About 13-second wake and undocked-only operation remain explicit limitations; no faster wake or improved battery result is claimed.
