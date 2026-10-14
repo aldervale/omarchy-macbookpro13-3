@@ -1,4 +1,4 @@
-# Review: October 9–10, 2026
+# Review: October 9–13, 2026
 
 This review covers the published repair code and instructions, the local
 installation scripts, installed hooks and permissions, keyboard settings,
@@ -70,6 +70,13 @@ daemon.
 
 ## Wake performance: localized, not yet improved
 
+October 13 update: repeated stock and #47 trials now show approximately
+17.5 seconds in noirq resume, chiefly two bridge callbacks taking about
+8.6–8.8 seconds each. The owner consistently measured 17–18 seconds to the
+screen. The earlier measurements below remain historical results; the system
+has not become faster. [Kernel packaging PR #544](https://github.com/omacom/omarchy-pkgs/pull/544)
+is a candidate to investigate separately, not a validated fix on this 13,3.
+
 Two recent traces measured about 6.24 seconds in each of two Alpine Ridge
 `8086:1578` upstream bridges' `pci_pm_resume_noirq` callbacks. With callbacks
 serialized, total noirq resume was 12.684 and 12.690 seconds. The owner timed
@@ -125,7 +132,7 @@ Our existing [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14
 | --- | --- |
 | Keyboard classification | A model/device-scoped libinput quirk in Omarchy; a companion settings-package change owns the database file. The proposed hardware installer and migration were removed. |
 | Lid wake and suspend | Optional EC wake module, guarded s2idle/Thunderbolt sequence, DKMS installation and removal; independent of the keyboard change. |
-| Touch Bar after sleep | Separate optional unpark hook and removal manifest; requires the sleep contribution and follows it in the merge order. |
+| Touch Bar after sleep | The separate optional display hook remains local. Two observed #47 driver recoveries without it may make this contribution unnecessary; complete package/reboot validation before deciding. |
 | NVMe target correction | Coordinate with existing PR #11624 instead of opening a duplicate. The setting's necessity on this Samsung-equipped model remains unproven. |
 | Wi-Fi, audio, T1 recovery and personal focus policy | Keep the complete setup and evidence in this repository. Firmware recovery and third-party driver installation are not automated by these contributions. |
 
@@ -147,4 +154,4 @@ Three source/packaging failures remain on that unchanged baseline:
 
 These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`. No tests or ownership checks were disabled to obtain a passing result. The full suite is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
 
-The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The owner's installed working hooks were retained. Extended typing, battery retention and port functionality after wake remain unvalidated. About 13-second wake and undocked-only operation remain explicit limitations; no faster wake or improved battery result is claimed.
+The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison, including its pending packaged reboot test. Extended typing, battery retention and port functionality after wake remain unvalidated. Latest wake is 17–18 seconds, and operation remains undocked-only; no faster wake or improved battery result is claimed.

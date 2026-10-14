@@ -5,10 +5,12 @@ with Touch Bar and the Apple T1 chip** into daily use with Omarchy. It connects
 existing community projects with our model-specific repair work and shares the
 experimental lid-wake workaround.
 
-**Touch Bar recovery now works in four owner-confirmed lid cycles, including
-one after a full reboot, using the optional guarded unpark hook. Wake still
-takes about 13 seconds. The battery previously ran flat with the lid closed
-for a couple of days; low-power sleep remains unresolved.**
+**Touch Bar recovery works with the guarded unpark hook. An October 13 trial
+of T1Bridge PR #47 also recovered the display without that hook in two
+owner-observed cycles, including a two-minute sleep. Reboot validation of the
+driver change is pending. Latest visible wake is 17–18 seconds; low-power
+sleep remains unresolved.** The battery previously ran flat with the lid
+closed for a couple of days.
 
 This is a record of progress on one machine, with reproducible source and
 instructions. It is not a complete suspend/resume fix or a general installer
@@ -23,17 +25,18 @@ for other MacBook models.
 | Speakers | Working after CS8409 community driver installation | Microphone and headphone switching not separately tested |
 | T1 firmware at startup | Recovered with `t1-revive`; survives a full shutdown/power-on | Keep a verified backup off this disk |
 | Touch Bar after startup | Display lights and controls work with T1Bridge | Startup success does not establish sleep recovery |
-| Touch Bar after sleep | **Display and Fn recover with the optional unpark hook** | Four automatic recoveries on one machine; long sleeps remain unvalidated |
-| Lid-open wake | Working in recorded cycles with the EC helper and Thunderbolt workaround | **About 13 seconds in two recent owner timings** |
+| Touch Bar after sleep | Hook recovery confirmed; experimental #47 also recovered display/Fn without the hook in two observed cycles | #47 reboot persistence and long sleeps remain unvalidated |
+| Lid-open wake | Working in recorded cycles with the EC helper and Thunderbolt workaround | **17–18 seconds on October 13; earlier cycles were about 13 seconds** |
 | USB-C/Thunderbolt controllers after sleep | Driver bindings recovered in recorded undocked cycles | External port functionality and docked sleep are unvalidated |
 | Battery retention with lid closed | **Unresolved; battery ran flat over a couple of days** | Missed suspend, unexpected wake and sleep power draw have not been distinguished |
 | Camera | Detected by the driver | Capture untested here |
 | Touch ID, Bluetooth and ambient light sensor | Not validated here | No fingerprint packages or PAM changes were part of this setup |
 
-The visible wake estimates are owner reports. A separate kernel trace measured
-about **12.67 seconds in noirq device resume**, largely two Thunderbolt bridge
-callbacks at about 6.24 seconds each. These measure different intervals and
-should not be added together. See [the evidence and chronology](docs/findings.md).
+The visible wake estimates are owner reports. October 13 kernel traces measured
+about **17.5 seconds in noirq device resume**, largely two Thunderbolt bridge
+callbacks at about 8.6–8.8 seconds each. Earlier traces measured about 12.67
+seconds in that phase. These measure different intervals from visible wake
+and should not be added together. See [the evidence and chronology](docs/findings.md).
 
 The sleep helper **refuses suspend while external USB devices, Thunderbolt
 devices or displays are attached**. Disconnect them before a lid test; a direct
@@ -89,6 +92,13 @@ depletion. Installed versions were checked again on October 9:
 
 These are tested versions, not a claim that they are the newest releases or
 that the same commands work unchanged on a future kernel.
+
+On October 13, the controlled #47 trial was packaged locally as
+`t1bridge-dkms 0.1.12.r47.d43d2c5-1` and installed for reboot validation.
+Its four modules rebuilt successfully; the boot image and module selection
+were verified. This is a local experimental package, not an official release.
+Reboot persistence remains pending; the original signed package and boot image
+are retained for rollback.
 
 ## Projects that made this possible
 

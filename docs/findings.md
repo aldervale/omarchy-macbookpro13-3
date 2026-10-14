@@ -92,14 +92,58 @@ distinguish a missed suspend, an unexpected wake, or continuous excessive
 suspend followed by a new boot with no recorded resume; that does not by itself
 identify the cause of the depletion.
 
+## Touch Bar recovery and controlled driver trial, October 9–13
+
+Two manual unparks and four automatic recoveries were confirmed on October 9,
+including a sleep cycle after a full reboot. The display was parked while its
+touch input still worked; one bounded HID awake report restored visible icons
+and Fn behavior. See [the optional recovery hook](touchbar.md).
+
+On October 13 we tested [T1Bridge PR #47](https://github.com/standardagents/t1bridge/pull/47)
+at `d43d2c52d965ce0ee495e311a6cf982ab6cc9b4f`, based on installed 0.1.12,
+with the userspace display hook disabled and the existing controller workaround
+retained. Initial attempts aborted with internal xHCI EBUSY; a stock-driver
+comparison in that same boot also aborted. These were not successful sleeps
+or faster resumes, and their cause remains unresolved. A failed suspend also
+exposed a limitation of our hook: it skips recovery when the suspend service
+fails, which can leave the panel parked after an abort.
+
+After a fresh boot, three stock cycles passed, including one after unloading
+and reloading the unchanged stock display driver. The subsequent #47 trial
+produced two directly observed successful sleep/display recovery cycles without
+the userspace unpark hook: approximately 28 seconds and 120 seconds asleep,
+with working Touch Bar/Fn afterward. One further suspend succeeded in the logs
+without a separate visual report. Kernel counters and systemd results confirm
+actual sleep, rather than screen blanking after an aborted attempt.
+
+Visible wake remained 17–18 seconds. In the observed two-minute #47 test,
+the two Alpine Ridge bridge callbacks consumed 8.705 and 8.582 seconds of a
+17.491-second noirq-resume phase; ordinary device resume took 0.526 seconds.
+Stock controls had comparable timings. This locates the dominant delay in
+bridge recovery but does not identify the precise firmware operation responsible.
+[Kernel packaging PR #544](https://github.com/omacom/omarchy-pkgs/pull/544)
+is a candidate for a separate investigation; its correction has not been
+tested on this machine. No faster-wake or battery improvement is claimed.
+
+The tested #47 source passed all components of its quality target across staged
+runs, including 980 Rust tests, native/sanitizer checks, dependency policy,
+kernel builds and isolated packaging verification. Three opt-in
+firmware/hardware tests were not run. A local package built from that exact
+source, `t1bridge-dkms 0.1.12.r47.d43d2c5-1`, is now installed for reboot
+validation. Its extracted sources rebuilt successfully, and installation
+verified the disk modules and boot image while preserving the kernel and boot
+arguments. The unpark override now persists across reboot. Reboot validation
+remains pending; a passing live-module trial does not establish persistence or
+validate the separate Omarchy installers.
+
 ## What remains to prove
 
 | Question | Current evidence | Required next measurement |
 | --- | --- | --- |
 | Does lid opening reliably wake it? | Several recorded successes and owner follow-up | Repeated cycles after fresh boots, on mains and battery |
-| How fast is visible wake? | Owner estimates about 10–15 seconds | Consistent lid-open-to-usable-screen timing |
-| Why is wake still slow? | About 12.67 seconds in bridge/noirq recovery | Trace the bridge callbacks and validate a targeted change |
-| Why does the Touch Bar display remain dark? | Startup illumination, dark after sleep, touch input survives | Confirmed display updates and before/after tracing |
+| How fast is visible wake? | Latest owner estimates 17–18 seconds; earlier 10–15 seconds | Consistent timing across power conditions and fresh boots |
+| Why is wake still slow? | Latest noirq phase about 17.5 seconds, mainly two bridges | Trace the bridge callbacks and validate a targeted change |
+| Can the display hook be retired? | Two observed #47 recoveries with the hook disabled | Packaged installation, reboot persistence and broader repeated-sleep validation |
 | Is closed-lid power use acceptable? | Battery depletion over multiple days | Undocked charge/energy snapshots plus proven suspend/wake intervals |
 | Do external ports work after wake? | Controllers remain bound | Functional USB-C, display and Thunderbolt tests |
 | Does it work while docked? | Current helper deliberately refuses that suspend | A separate docked policy and hardware tests |

@@ -6,6 +6,14 @@ Fn then changed the visible icons. Two manual recoveries and four automatic
 recoveries were owner-confirmed on October 9, including a sleep cycle after a
 full reboot. This does not establish support for other models or deep/S3 sleep.
 
+**October 13 update:** a controlled trial of
+[T1Bridge PR #47](https://github.com/standardagents/t1bridge/pull/47) at
+`d43d2c52d965ce0ee495e311a6cf982ab6cc9b4f` restored visible icons and Fn without
+this hook in two observed cycles, including a two-minute sleep. Reboot
+validation is pending. That result may let us retire this separate workaround;
+the instructions below describe the existing 0.1.12 hook. See the
+[controlled trial evidence](findings.md#touch-bar-recovery-and-controlled-driver-trial-october-913).
+
 ## What the hook does
 
 The T1Bridge 0.1.12 display driver parks the panel during suspend. Our helper
@@ -21,8 +29,14 @@ the suspend service. A process timeout cannot guarantee termination of a
 kernel operation stuck in uninterruptible sleep. No ACPI method, firmware
 recovery, USB reset, rebind or service restart is involved.
 
+An aborted suspend is a known gap: the wrapper skips recovery when suspend
+fails, even if the driver already parked the display. This was observed during
+the October 13 USB suspend failures. It requires a separate recovery-path fix
+if this hook remains necessary; the current instructions do not resolve it.
+
 The tested write took approximately 12 ms; the complete hook took about
-0.74 seconds. The separate 12.7-second kernel noirq phase dominates wake time.
+0.74 seconds. The separate kernel noirq phase dominates wake time: about 12.7
+seconds in earlier measurements and 17.5 seconds in the October 13 controls.
 
 ## Install
 
