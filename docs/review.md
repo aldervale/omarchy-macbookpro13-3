@@ -132,7 +132,7 @@ Our existing [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14
 | --- | --- |
 | Keyboard classification | A model/device-scoped libinput quirk in Omarchy; a companion settings-package change owns the database file. The proposed hardware installer and migration were removed. |
 | Lid wake and suspend | Optional EC wake module, guarded s2idle/Thunderbolt sequence, DKMS installation and removal; independent of the keyboard change. |
-| Touch Bar after sleep | Hold the separate display-hook contribution: #47 has three observed recoveries without it, including after a packaged reboot. Prefer the driver fix if broader validation and upstream delivery succeed. |
+| Touch Bar after sleep | Hold the separate display-hook contribution: #47 has four observed recoveries without it, including two after a packaged reboot. Prefer the driver fix if broader validation and upstream delivery succeed. |
 | NVMe target correction | Coordinate with existing PR #11624 instead of opening a duplicate. The setting's necessity on this Samsung-equipped model remains unproven. |
 | Wi-Fi, audio, T1 recovery and personal focus policy | Keep the complete setup and evidence in this repository. Firmware recovery and third-party driver installation are not automated by these contributions. |
 
@@ -154,4 +154,10 @@ Three source/packaging failures remain on that unchanged baseline:
 
 These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`. No tests or ownership checks were disabled to obtain a passing result. The full suite is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
 
-The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and one sleep/recovery cycle after a full reboot; this is separate from the Omarchy installer tests. Extended typing, battery retention and port functionality after wake remain unvalidated. Latest wake is 17–18 seconds, and operation remains undocked-only; no faster wake or improved battery result is claimed.
+The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot; this is separate from the Omarchy installer tests. Extended typing, battery retention and port functionality after wake remain unvalidated. Latest wake is 17–18 seconds, and operation remains undocked-only; no faster wake or improved battery result is claimed.
+
+A subsequent read-only mailbox trace counted 200,160 ACPI PCI reads at offset
+`0x530`, all targeting host bridge `00:00.0`. This supports the address-derivation
+fault described in #544 and gives a concrete target for the next experiment.
+The trace was removed, its logging settings restored, and no kernel correction
+has yet been installed. See [the trace evidence and limits](findings.md#touch-bar-recovery-and-controlled-driver-trial-october-913).

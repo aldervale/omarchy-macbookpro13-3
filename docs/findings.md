@@ -145,14 +145,35 @@ visible-wake estimate, not a new bridge timing measurement. These results
 validate this local package's startup and one post-reboot recovery; they do
 not validate long sleeps, other models or the separate Omarchy installers.
 
+A second post-reboot cycle also passed, bringing #47 to four directly observed
+recoveries, with two after installing the package and rebooting. The owner again
+reported approximately 18 seconds and working Touch Bar/Fn; counters reached
+two successes and zero failures in that boot. A temporary entry kprobe counted
+ACPI PCI configuration reads at segment 0, register `0x530`, width 32, without
+changing arguments or return values. The baseline count was zero. Across the
+attended cycle, **all 200,160 matching reads went to `00:00.0`**, with no dropped
+histogram entries or missed probe hits. This is the host bridge, rather than
+the two Thunderbolt upstream bridges at `04:00.0` and `7a:00.0` whose firmware
+declares the mailbox regions. Static firmware review found the matching bounded
+CIOR/CRMW polling paths. This supports the wrong-address diagnosis behind #544;
+the observation does not itself test the fix or capture first-use region
+derivation, which may already have been cached.
+
+This instrumented cycle slept for 25.561 seconds. The two bridge callbacks took
+8.883304 and 8.768498 seconds; total noirq resume was 17.859020 seconds and
+ordinary device resume was 0.531384 seconds. Instrumentation can add overhead,
+so this is diagnostic evidence, not a precise speed comparison. The trace was
+removed and prior logging settings restored. The current kernel and sleep
+workaround remain unchanged; a separate patched-kernel trial is being prepared.
+
 ## What remains to prove
 
 | Question | Current evidence | Required next measurement |
 | --- | --- | --- |
 | Does lid opening reliably wake it? | Several recorded successes and owner follow-up | Repeated cycles after fresh boots, on mains and battery |
 | How fast is visible wake? | Latest owner estimates 17–18 seconds; earlier 10–15 seconds | Consistent timing across power conditions and fresh boots |
-| Why is wake still slow? | Latest noirq phase about 17.5 seconds, mainly two bridges | Trace the bridge callbacks and validate a targeted change |
-| Can the display hook be retired? | Three observed #47 recoveries with it disabled, including after a packaged reboot | Broader repeated/long-sleep validation and upstream driver delivery |
+| Why is wake still slow? | Two bridge callbacks dominate; 200,160 mailbox reads hit the host bridge | Test the targeted ACPICA correction and verify correct addresses and faster resume |
+| Can the display hook be retired? | Four observed #47 recoveries with it disabled, two after a packaged reboot | Broader repeated/long-sleep validation and upstream driver delivery |
 | Is closed-lid power use acceptable? | Battery depletion over multiple days | Undocked charge/energy snapshots plus proven suspend/wake intervals |
 | Do external ports work after wake? | Controllers remain bound | Functional USB-C, display and Thunderbolt tests |
 | Does it work while docked? | Current helper deliberately refuses that suspend | A separate docked policy and hardware tests |

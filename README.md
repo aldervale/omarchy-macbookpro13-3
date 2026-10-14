@@ -6,8 +6,8 @@ existing community projects with our model-specific repair work and shares the
 experimental lid-wake workaround.
 
 **Touch Bar recovery works with the guarded unpark hook. An October 13 trial
-of T1Bridge PR #47 also recovered the display without that hook in three
-owner-observed cycles, including a two-minute sleep and a cycle after installing
+of T1Bridge PR #47 also recovered the display without that hook in four
+owner-observed cycles, including a two-minute sleep and two cycles after installing
 the tested package and fully rebooting. Latest visible wake is 17–18 seconds; low-power
 sleep remains unresolved.** The battery previously ran flat with the lid
 closed for a couple of days.
@@ -25,7 +25,7 @@ for other MacBook models.
 | Speakers | Working after CS8409 community driver installation | Microphone and headphone switching not separately tested |
 | T1 firmware at startup | Recovered with `t1-revive`; survives a full shutdown/power-on | Keep a verified backup off this disk |
 | Touch Bar after startup | Display lights and controls work with T1Bridge | Startup success does not establish sleep recovery |
-| Touch Bar after sleep | Experimental #47 recovered display/Fn without the hook in three observed cycles, including after a packaged reboot | Long sleeps and broader reliability remain unvalidated |
+| Touch Bar after sleep | Experimental #47 recovered display/Fn without the hook in four observed cycles, including two after a packaged reboot | Long sleeps and broader reliability remain unvalidated |
 | Lid-open wake | Working in recorded cycles with the EC helper and Thunderbolt workaround | **17–18 seconds on October 13; earlier cycles were about 13 seconds** |
 | USB-C/Thunderbolt controllers after sleep | Driver bindings recovered in recorded undocked cycles | External port functionality and docked sleep are unvalidated |
 | Battery retention with lid closed | **Unresolved; battery ran flat over a couple of days** | Missed suspend, unexpected wake and sleep power draw have not been distinguished |
@@ -34,7 +34,10 @@ for other MacBook models.
 
 The visible wake estimates are owner reports. October 13 kernel traces measured
 about **17.5 seconds in noirq device resume**, largely two Thunderbolt bridge
-callbacks at about 8.6–8.8 seconds each. Earlier traces measured about 12.67
+callbacks at about 8.6–8.9 seconds each. A later diagnostic counted 200,160
+ACPI mailbox reads to host bridge `00:00.0`, supporting the wrong-address
+mechanism described in [kernel PR #544](https://github.com/omacom/omarchy-pkgs/pull/544).
+Its correction has not been tested here. Earlier traces measured about 12.67
 seconds in that phase. These measure different intervals from visible wake
 and should not be added together. See [the evidence and chronology](docs/findings.md).
 
@@ -98,7 +101,7 @@ On October 13, the controlled #47 trial was packaged locally as
 Its four modules rebuilt successfully; the boot image and module selection
 were verified. This is a local experimental package, not an official release.
 The loaded module identity was verified after a full reboot. Startup and the
-first subsequent lid-sleep cycle both passed with the separate unpark hook
+two subsequent lid-sleep cycles passed with the separate unpark hook
 disabled; visible wake took about 18 seconds. The original signed package and
 boot image are retained for rollback.
 

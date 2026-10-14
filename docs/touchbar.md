@@ -9,7 +9,7 @@ full reboot. This does not establish support for other models or deep/S3 sleep.
 **October 13 update:** a controlled trial of
 [T1Bridge PR #47](https://github.com/standardagents/t1bridge/pull/47) at
 `d43d2c52d965ce0ee495e311a6cf982ab6cc9b4f` restored visible icons and Fn without
-this hook in three observed cycles, including a two-minute sleep and one after
+this hook in four observed cycles, including a two-minute sleep and two after
 a full reboot with the locally packaged driver. Loaded-module identity,
 successful suspend and the absence of the unpark hook were verified; the owner
 confirmed startup, automatic lid wake and working display/Fn. Latest wake was
