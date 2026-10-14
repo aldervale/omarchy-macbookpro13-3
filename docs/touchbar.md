@@ -9,8 +9,12 @@ full reboot. This does not establish support for other models or deep/S3 sleep.
 **October 13 update:** a controlled trial of
 [T1Bridge PR #47](https://github.com/standardagents/t1bridge/pull/47) at
 `d43d2c52d965ce0ee495e311a6cf982ab6cc9b4f` restored visible icons and Fn without
-this hook in two observed cycles, including a two-minute sleep. Reboot
-validation is pending. That result may let us retire this separate workaround;
+this hook in three observed cycles, including a two-minute sleep and one after
+a full reboot with the locally packaged driver. Loaded-module identity,
+successful suspend and the absence of the unpark hook were verified; the owner
+confirmed startup, automatic lid wake and working display/Fn. Latest wake was
+about 18 seconds. These results favor the driver fix, with longer sleeps and
+broader reliability still unvalidated. It may let us retire this separate workaround;
 the instructions below describe the existing 0.1.12 hook. See the
 [controlled trial evidence](findings.md#touch-bar-recovery-and-controlled-driver-trial-october-913).
 

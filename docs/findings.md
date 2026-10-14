@@ -129,12 +129,21 @@ The tested #47 source passed all components of its quality target across staged
 runs, including 980 Rust tests, native/sanitizer checks, dependency policy,
 kernel builds and isolated packaging verification. Three opt-in
 firmware/hardware tests were not run. A local package built from that exact
-source, `t1bridge-dkms 0.1.12.r47.d43d2c5-1`, is now installed for reboot
-validation. Its extracted sources rebuilt successfully, and installation
+source, `t1bridge-dkms 0.1.12.r47.d43d2c5-1`, is now installed.
+Its extracted sources rebuilt successfully, and installation
 verified the disk modules and boot image while preserving the kernel and boot
-arguments. The unpark override now persists across reboot. Reboot validation
-remains pending; a passing live-module trial does not establish persistence or
-validate the separate Omarchy installers.
+arguments. The unpark override now persists across reboot.
+
+A full reboot then loaded the expected #47 module, with visible Touch Bar and
+working Fn at startup. The first lid cycle after that reboot also passed:
+automatic wake in approximately 18 seconds, visible icons and working Fn.
+Kernel counters advanced from zero to one successful suspend with zero failures;
+systemd reported success and ran only controller cleanup, with no userspace
+unpark. This is the third directly observed #47 sleep/display recovery pass.
+Detailed per-device timing was disabled after reboot, so this cycle adds a
+visible-wake estimate, not a new bridge timing measurement. These results
+validate this local package's startup and one post-reboot recovery; they do
+not validate long sleeps, other models or the separate Omarchy installers.
 
 ## What remains to prove
 
@@ -143,7 +152,7 @@ validate the separate Omarchy installers.
 | Does lid opening reliably wake it? | Several recorded successes and owner follow-up | Repeated cycles after fresh boots, on mains and battery |
 | How fast is visible wake? | Latest owner estimates 17–18 seconds; earlier 10–15 seconds | Consistent timing across power conditions and fresh boots |
 | Why is wake still slow? | Latest noirq phase about 17.5 seconds, mainly two bridges | Trace the bridge callbacks and validate a targeted change |
-| Can the display hook be retired? | Two observed #47 recoveries with the hook disabled | Packaged installation, reboot persistence and broader repeated-sleep validation |
+| Can the display hook be retired? | Three observed #47 recoveries with it disabled, including after a packaged reboot | Broader repeated/long-sleep validation and upstream driver delivery |
 | Is closed-lid power use acceptable? | Battery depletion over multiple days | Undocked charge/energy snapshots plus proven suspend/wake intervals |
 | Do external ports work after wake? | Controllers remain bound | Functional USB-C, display and Thunderbolt tests |
 | Does it work while docked? | Current helper deliberately refuses that suspend | A separate docked policy and hardware tests |
