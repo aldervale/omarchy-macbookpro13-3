@@ -15,6 +15,9 @@ This is a record of progress on one machine, with reproducible source and
 instructions. It is not a complete suspend/resume fix or a general installer
 for other MacBook models.
 
+See the [October 20 status and atomic upstream plan](docs/status.md) for the
+current results, contribution boundaries and remaining test gates.
+
 ## Results on this machine
 
 | Feature | Observed result | Remaining limitation |
@@ -66,7 +69,7 @@ validation, and [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull
 The existing draft contains the earlier combined proposal. Separate keyboard,
 sleep and dependent Touch Bar contributions are now prepared locally, with a
 companion keyboard packaging change. New submissions are held until the full
-test gate passes; the review records the current upstream test blockers.
+test gate passes; the review records blockers on the last tested upstream bases.
 The split installers also need attended hardware validation.
 
 Clone this repository:

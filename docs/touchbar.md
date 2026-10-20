@@ -6,14 +6,17 @@ Fn then changed the visible icons. Two manual recoveries and four automatic
 recoveries were owner-confirmed on October 9, including a sleep cycle after a
 full reboot. This does not establish support for other models or deep/S3 sleep.
 
-**October 13 update:** a controlled trial of
+**October 20 update:** controlled trials of
 [T1Bridge PR #47](https://github.com/standardagents/t1bridge/pull/47) at
 `d43d2c52d965ce0ee495e311a6cf982ab6cc9b4f` restored visible icons and Fn without
-this hook in four observed cycles, including a two-minute sleep and two after
-a full reboot with the locally packaged driver. Loaded-module identity,
+this hook in seven observed cycles: four on the original kernel, including two
+after a full reboot with the locally packaged driver, and three on the ACPI
+trial kernel. The last two included 15 minutes asleep on battery. Loaded-module identity,
 successful suspend and the absence of the unpark hook were verified; the owner
 confirmed startup, automatic lid wake and working display/Fn. Latest wake was
-about 18 seconds. These results favor the driver fix, with longer sleeps and
+about 18 seconds before the ACPI kernel correction; the first two attended
+ACPI-kernel tests woke in about one second / nearly immediately. These results
+favor the driver fix, with longer sleeps and
 broader reliability still unvalidated. It may let us retire this separate workaround;
 the instructions below describe the existing 0.1.12 hook. See the
 [controlled trial evidence](findings.md#touch-bar-recovery-and-controlled-driver-trial-october-913).

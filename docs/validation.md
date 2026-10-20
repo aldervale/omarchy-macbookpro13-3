@@ -41,6 +41,10 @@ Six shell files passed individual `bash -n` checks. The published Touch Bar
 sysfs-only preflight passed on this host without opening a device node. These
 checks do not replace a fresh hardware test of the new installer/readback check.
 
+The October 20 documentation publication reran all 28 isolated tests and the
+six shell syntax checks successfully. Relative document links/anchors and
+`git diff --check` also passed. No runtime source changed in this publication.
+
 ## Short attended lid test
 
 1. Save work, start from a healthy boot and disconnect all peripherals except
@@ -55,12 +59,14 @@ checks do not replace a fresh hardware test of the new installer/readback check.
 5. Inspect the local logs for actual `s2idle` entry/exit and completed cleanup.
    Repeat on mains and battery, including after a fresh boot.
 
-With the optional Touch Bar hook, the display and Fn recovered automatically
+Historically, with the optional Touch Bar hook, the display and Fn recovered automatically
 in four owner-confirmed cycles, including one after a full reboot. Two recent
 owner timings were **13 seconds** to visible wake. Without that hook, the
 display remained dark despite working touch input. Record the actual behavior
 and the installed helper revision; long sleeps and battery retention are still
-unvalidated.
+unvalidated by those four cycles. Subsequent driver and kernel trials are
+summarized in [the current status](status.md); severe battery depletion has
+since been confirmed.
 
 ## Battery retention test
 
@@ -72,8 +78,12 @@ test, attended at both ends, rather than another multi-day closed-lid run.
 - After opening, record the same values and wake delay immediately.
 - Check actual sleep duration and whether there were unexpected wake/resuspend
   events. A failed peripheral guard means the test did not enter this suspend.
-- Report loss per hour and the observed interval. A drop of percentage points
-  per hour differs from absolute energy loss; retain units with each value.
+- Continue recording while unplugged after wake, because the October 20 test
+  showed delayed/abrupt charge-estimate changes. Separate awake time from sleep
+  and do not treat an unstable immediate reading as sleep consumption.
+- Report a loss rate only if the readings and interval support it. A drop of
+  percentage points per hour differs from absolute energy loss; retain units
+  with each value. Current short-test data do not establish sleep watts.
 
 The status script prints available battery values without serial numbers. A
 controlled discharge with confirmed suspend is needed before attributing drain

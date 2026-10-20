@@ -1,9 +1,12 @@
-# Review: October 9–13, 2026
+# Review: October 9–20, 2026
 
 This review covers the published repair code and instructions, the local
 installation scripts, installed hooks and permissions, keyboard settings,
 and selected upstream driver/source paths. It is not a security certification
 of the Linux kernel, Apple firmware or all dependencies in T1Bridge/audio.
+
+The [current status and upstream plan](status.md) summarizes the latest results.
+The dated investigations below retain their original measurement boundaries.
 
 ## Security and simpler implementation
 
@@ -68,14 +71,20 @@ requires that internal-keyboard tag for an internal touchpad. This supports
 fixing the vendor-zero rule rather than adding a background input-monitoring
 daemon.
 
-## Wake performance: localized, not yet improved
+## Wake performance: investigation and subsequent correction
 
-October 13 update: repeated stock and #47 trials now show approximately
+October 20 status: the ACPICA correction now builds and runs in our separate
+trial kernel. Three attended recoveries passed across two boots; the first
+two were reported as about one second / nearly immediate. Battery retention
+remains unresolved. The following paragraphs describe the earlier investigation,
+before that correction was built; see [findings](findings.md) for the later tests.
+
+October 13 checkpoint: repeated stock and #47 trials showed approximately
 17.5 seconds in noirq resume, chiefly two bridge callbacks taking about
 8.6–8.8 seconds each. The owner consistently measured 17–18 seconds to the
-screen. The earlier measurements below remain historical results; the system
-has not become faster. [Kernel packaging PR #544](https://github.com/omacom/omarchy-pkgs/pull/544)
-is a candidate to investigate separately, not a validated fix on this 13,3.
+screen. At that point the system had not become faster.
+[Kernel packaging PR #544](https://github.com/omacom/omarchy-pkgs/pull/544)
+was a candidate to investigate separately.
 
 Two recent traces measured about 6.24 seconds in each of two Alpine Ridge
 `8086:1578` upstream bridges' `pci_pm_resume_noirq` callbacks. With callbacks
@@ -126,13 +135,15 @@ As checked for this review, related upstream work already exists:
 | BCM43602 5 GHz board file | [#7671](https://github.com/omacom/omarchy/pull/7671) | Open; availability of a PR does not mean the fix ships |
 | T1 display resume | [T1Bridge #18](https://github.com/standardagents/t1bridge/issues/18) | Appropriate home for driver-level park/unpark evidence; models and sleep states have differing results |
 
-Our existing [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894) contains the earlier combined proposal. It remains a draft at `4c02255`. The next revision is being prepared as atomic contributions, with no new submissions or pushes until the test gate passes:
+Our existing [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894) contains the earlier combined proposal. It remains a draft at `4c02255`. Replacement code PRs are being prepared as atomic contributions and will wait for their test gates. Documentation and hardware evidence are being published separately:
 
 | Contribution | Scope and dependency |
 | --- | --- |
 | Keyboard classification | A model/device-scoped libinput quirk in Omarchy; a companion settings-package change owns the database file. The proposed hardware installer and migration were removed. |
 | Lid wake and suspend | Optional EC wake module, guarded s2idle/Thunderbolt sequence, DKMS installation and removal; independent of the keyboard change. |
-| Touch Bar after sleep | Hold the separate display-hook contribution: #47 has four observed recoveries without it, including two after a packaged reboot. Prefer the driver fix if broader validation and upstream delivery succeed. |
+| Touch Bar after sleep | Hold the separate display-hook contribution: #47 has seven observed recoveries without it, including three on the ACPI trial kernel. Prefer the driver fix if broader validation and upstream delivery succeed. |
+| Resume latency | Report our built-kernel results to ACPICA #1235 and omarchy-pkgs #544; do not duplicate their patch. |
+| Battery retention and critical power | Track separately; cause and reliable sleep-power measurement remain unresolved. |
 | NVMe target correction | Coordinate with existing PR #11624 instead of opening a duplicate. The setting's necessity on this Samsung-equipped model remains unproven. |
 | Wi-Fi, audio, T1 recovery and personal focus policy | Keep the complete setup and evidence in this repository. Firmware recovery and third-party driver installation are not automated by these contributions. |
 
@@ -146,15 +157,15 @@ The atomic branches are based on Omarchy `77bfaca`. Keyboard matching and libinp
 
 A full run against **unchanged upstream** completed all 370 shell test files and the CLI suite. The CLI suite passed; ten shell files failed and 31 contained skipped checks. Seven of those failures subsequently passed unchanged in an appropriate clean environment: the original failures involved read-only fixture mounts, missing companion ISO sources, namespace ownership or system time-service access. Headless skips remain unexecuted coverage, not passes.
 
-Three source/packaging failures remain on that unchanged baseline:
+Three source/packaging failures remained on that unchanged baseline:
 
 - `default-agent-test.sh` expects `mise unuse -g`, while the existing Grok migration calls `mise unuse -y -g`. A separate local assertion correction passes its focused test; it is not mixed into the hardware branches.
 - `passwordless-grant-lifecycle-test.sh` requires removal hooks missing from the current companion settings packages. [omarchy-pkgs PR #257](https://github.com/omacom/omarchy-pkgs/pull/257) proposes the related lifecycle work but is not merged into the tested package base.
 - `unowned-system-paths-test.sh` identifies USB/Thunderbolt polkit files that the current package recipes do not own. The earlier keyboard draft added another unowned path; the new package-owned design removes that regression. The four baseline polkit reports remain.
 
-These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`. No tests or ownership checks were disabled to obtain a passing result. The full suite is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
+These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`; they have not been rerun against today's upstream heads. No tests or ownership checks were disabled to obtain a passing result. That full-suite gate is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
 
-The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot, followed by two successful cycles on separate boots of the ACPI trial kernel; this is separate from the Omarchy installer tests. Both ACPI trials woke in about one second, per the owner; the second included 15 minutes asleep on battery. Broader repeated testing, extended typing and port functionality after wake remain outstanding; operation remains undocked-only.
+The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot, followed by three successful cycles across two boots of the ACPI trial kernel; this is separate from the Omarchy installer tests. The first two ACPI trials woke in about one second / nearly immediately, per the owner; the last two included 15 minutes asleep on battery. The third had no numerical latency report. Broader repeated testing, extended typing and port functionality after wake remain outstanding; operation remains undocked-only.
 
 Saved history reviewed October 19 shows severe battery depletion across about five hours of confirmed closed-lid suspend on October 15. The emergency suspend-then-hibernate path bypasses the installed MacBook hooks and has no recorded completion. Battery retention and compatible critical-power handling are unresolved hardware gates. No improved battery result is claimed.
 
