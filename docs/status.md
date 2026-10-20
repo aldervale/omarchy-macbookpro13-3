@@ -42,6 +42,17 @@ See [findings](findings.md) for dates, measurements and limitations.
 Until battery retention is fixed and validated, shut down for long unplugged
 periods and transport.
 
+## Published reports
+
+| Discussion | Our October 20 update |
+| --- | --- |
+| T1Bridge display fix | [Seven observed recoveries on #47](https://github.com/standardagents/t1bridge/pull/47#issuecomment-6299070893) |
+| ACPICA upstream correction | [Built-kernel evidence on #1235](https://github.com/open-acpica/acpica/pull/1235#issuecomment-6299076144) |
+| Omarchy kernel carry | [Recipe scope and hardware results on #544](https://github.com/omacom/omarchy-pkgs/pull/544#issuecomment-6299083330) |
+| Existing Omarchy draft | [Progress and atomic submission gates on #14894](https://github.com/omacom/omarchy/pull/14894#issuecomment-6299145124) |
+| Omarchy T1 driver discussion | [Scoped hardware cross-reference on #10825](https://github.com/omacom/omarchy/issues/10825#issuecomment-6299159271) |
+| Battery investigation | [Retention and critical-power tracking issue](https://github.com/aldervale/omarchy-macbookpro13-3/issues/1) |
+
 ## Atomic contributions
 
 | Area | Destination and present status | Remaining gate |
