@@ -4,6 +4,44 @@ This chronology summarizes our local repair notes and the owner's observations.
 It contains no raw journals, machine identifiers, restore transcripts or
 firmware. Times are approximate where the owner reported them.
 
+## Update: automatic battery recording and third ACPI recovery, October 20
+
+The repeat test recorded 322 snapshots, including about five minutes unplugged
+before sleep, 900.67 seconds suspended and 121 seconds after wake. AC remained
+disconnected through the entire sleep and post-wake capture. The owner reported
+that all seven test steps worked, including automatic wake and Touch Bar/Fn;
+no numerical wake-time estimate was supplied for this cycle. Suspend counters
+advanced from one to two successes with zero failures, both controller pairs
+recovered, and `pm_async` returned to 1. This is the third attended ACPI-kernel
+recovery and seventh directly observed #47 display/Fn recovery.
+
+The recorder exposed remaining-charge estimates that do not track a simple
+before/after sleep comparison:
+
+| Sample | Reported remaining charge |
+| --- | --- |
+| Last sample before suspend, 10:40:31 PDT | 5,256 mAh |
+| First sample after wake, 10:55:38 | 5,310 mAh |
+| End of post-wake recording, 10:57:39 | 5,012 mAh |
+
+The apparent 54 mAh increase happened while unplugged. The following 121
+seconds showed a 298 mAh decrease, while trapezoidal integration of sampled
+awake current accounts for about 67 mAh. For comparison, the last minute
+before sleep showed a 42 mAh decrease and about 42 mAh from sampled current.
+Delayed reporting of sleep consumption or gauge recalculation could explain
+the post-wake discrepancy; neither cause is established. These are readings
+from the same battery interface, not independent electrical measurements.
+Do not publish the residual as measured sleep power or claim battery retention
+is fixed. The earlier five-hour depletion remains unresolved.
+
+A separate source review found that this kernel's ACPI SBS driver obtains
+`capacity` from command `0x0e`, the percentage of original design capacity,
+rather than `0x0d`, the percentage of current full-charge capacity. An existing
+[upstream patch proposal](https://lists.openwall.net/linux-kernel/2026/09/03/1310)
+addresses that mismatch. This explains why the raw percentage and percentages
+computed from remaining/full charge differ; it does **not** explain the
+remaining-charge jumps or fix sleep consumption. No driver change was made.
+
 ## Update: second fast wake; battery measurement inconclusive, October 20
 
 On a different boot of the same ACPI trial kernel and PR #47 driver, the owner
@@ -243,7 +281,7 @@ recorded in the October 14–19 update above.
 | Does lid opening reliably wake it? | Several recorded successes and owner follow-up | Repeated cycles after fresh boots, on mains and battery |
 | How fast is visible wake? | About 1 second in two ACPI-trial tests on separate boots, including 15 minutes on battery; previously 17–18 seconds | Broader repeated testing |
 | Does the correction remove the bridge delay? | Old kernel: 200,160 wrong-address reads; corrected kernel: two visibly faster wakes | Verify corrected addresses and per-bridge timing on the trial kernel |
-| Can the display hook be retired? | Six observed #47 recoveries with it disabled, including two on the ACPI trial | Broader repeated/long-sleep validation and upstream driver delivery |
+| Can the display hook be retired? | Seven observed #47 recoveries with it disabled, including three on the ACPI trial | Broader repeated/long-sleep validation and upstream driver delivery |
 | Is closed-lid power use acceptable? | No: nearly full to 0% across about five hours of confirmed suspend | Controlled undocked charge/energy snapshots and device power-state investigation |
 | Is critical-battery handling safe? | Emergency suspend-then-hibernate bypasses the MacBook hooks; completion unconfirmed | A compatible, tested critical-power action and recovery path |
 | Do external ports work after wake? | Controllers remain bound | Functional USB-C, display and Thunderbolt tests |

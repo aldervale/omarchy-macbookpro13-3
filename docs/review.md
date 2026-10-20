@@ -163,6 +163,15 @@ not isolate sleep consumption: charge readings changed sharply after wake,
 and the ending manual snapshot included awake time and recharging. Automatic
 sampling through the settling period is needed before claiming a drain rate.
 
+The subsequent automatic repeat captured another successful 15-minute sleep
+and two unplugged minutes after wake. It confirmed abrupt remaining-charge
+estimate changes inconsistent with sampled awake current; no validated
+sleep-power estimate follows. Three ACPI-kernel recoveries are now observed,
+with the first two explicitly reported as approximately one second. A separate
+ACPI SBS percentage-reporting mismatch has an existing upstream patch proposal;
+it does not correct remaining-charge estimates or establish a drain fix.
+See [the automatic test evidence and limits](findings.md).
+
 A subsequent read-only mailbox trace counted 200,160 ACPI PCI reads at offset
 `0x530`, all targeting host bridge `00:00.0`. This supports the address-derivation
 fault described in #544. The trace was removed and its logging settings restored.

@@ -24,7 +24,7 @@ for other MacBook models.
 | Speakers | Working after CS8409 community driver installation | Microphone and headphone switching not separately tested |
 | T1 firmware at startup | Recovered with `t1-revive`; survives a full shutdown/power-on | Keep a verified backup off this disk |
 | Touch Bar after startup | Display lights and controls work with T1Bridge | Startup success does not establish sleep recovery |
-| Touch Bar after sleep | Experimental #47 recovered display/Fn without the hook in six observed cycles, including two on the ACPI trial kernel | Multi-hour display recovery and broader reliability remain unvalidated |
+| Touch Bar after sleep | Experimental #47 recovered display/Fn without the hook in seven observed cycles, including three on the ACPI trial kernel | Multi-hour display recovery and broader reliability remain unvalidated |
 | Lid-open wake | About **1 second** in two ACPI-kernel tests on separate boots, including a 15-minute battery sleep; previously 17–18 seconds | Broader repeated testing remains outstanding |
 | USB-C/Thunderbolt controllers after sleep | Driver bindings recovered in recorded undocked cycles | External port functionality and docked sleep are unvalidated |
 | Battery retention with lid closed | **Severe depletion across about five hours of confirmed suspend** | Device cause, precise sleep power and wake trigger remain unknown; emergency hibernation did not record completion |
@@ -117,6 +117,11 @@ On October 20, a 15-minute battery sleep on another boot also woke nearly
 immediately with Touch Bar/Fn working. Battery history and a later endpoint
 were insufficient to isolate sleep consumption: readings changed sharply
 after wake, and charging had resumed before the endpoint capture.
+
+A second 15-minute battery test used automatic sampling and stayed unplugged
+through two minutes after wake. Recovery passed again. Reported remaining
+charge briefly increased across sleep, then dropped in steps after wake;
+these observations still do not establish a trustworthy sleep-power figure.
 
 ## Projects that made this possible
 
