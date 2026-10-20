@@ -154,10 +154,13 @@ Three source/packaging failures remain on that unchanged baseline:
 
 These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`. No tests or ownership checks were disabled to obtain a passing result. The full suite is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
 
-The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot; this is separate from the Omarchy installer tests. Extended typing, battery retention and port functionality after wake remain unvalidated. Latest wake is 17–18 seconds, and operation remains undocked-only; no faster wake or improved battery result is claimed.
+The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot, followed by one successful cycle on the ACPI trial kernel; this is separate from the Omarchy installer tests. That latest attended cycle took about one second to illumination, per the owner. Repeated fast-wake testing, extended typing and port functionality after wake remain outstanding; operation remains undocked-only.
+
+Saved history reviewed October 19 shows severe battery depletion across about five hours of confirmed closed-lid suspend on October 15. The emergency suspend-then-hibernate path bypasses the installed MacBook hooks and has no recorded completion. Battery retention and compatible critical-power handling are unresolved hardware gates. No improved battery result is claimed.
 
 A subsequent read-only mailbox trace counted 200,160 ACPI PCI reads at offset
 `0x530`, all targeting host bridge `00:00.0`. This supports the address-derivation
-fault described in #544 and gives a concrete target for the next experiment.
-The trace was removed, its logging settings restored, and no kernel correction
-has yet been installed. See [the trace evidence and limits](findings.md#touch-bar-recovery-and-controlled-driver-trial-october-913).
+fault described in #544. The trace was removed and its logging settings restored.
+A separate kernel carrying the correction subsequently passed the first attended
+fast-wake test; no corrected-address trace has yet been captured. See
+[the updated results and limits](findings.md).

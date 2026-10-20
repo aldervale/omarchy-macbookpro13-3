@@ -5,12 +5,11 @@ with Touch Bar and the Apple T1 chip** into daily use with Omarchy. It connects
 existing community projects with our model-specific repair work and shares the
 experimental lid-wake workaround.
 
-**Touch Bar recovery works with the guarded unpark hook. An October 13 trial
-of T1Bridge PR #47 also recovered the display without that hook in four
-owner-observed cycles, including a two-minute sleep and two cycles after installing
-the tested package and fully rebooting. Latest visible wake is 17–18 seconds; low-power
-sleep remains unresolved.** The battery previously ran flat with the lid
-closed for a couple of days.
+**The experimental ACPI kernel reduced visible wake from 17–18 seconds to about
+1 second in one attended October 14 test, with Touch Bar/Fn working through
+T1Bridge PR #47 and the separate unpark hook disabled. Battery retention remains
+broken:** saved history reviewed October 19 shows a nearly full battery falling
+to 0% across about five hours of closed-lid `s2idle` on October 15.
 
 This is a record of progress on one machine, with reproducible source and
 instructions. It is not a complete suspend/resume fix or a general installer
@@ -25,10 +24,10 @@ for other MacBook models.
 | Speakers | Working after CS8409 community driver installation | Microphone and headphone switching not separately tested |
 | T1 firmware at startup | Recovered with `t1-revive`; survives a full shutdown/power-on | Keep a verified backup off this disk |
 | Touch Bar after startup | Display lights and controls work with T1Bridge | Startup success does not establish sleep recovery |
-| Touch Bar after sleep | Experimental #47 recovered display/Fn without the hook in four observed cycles, including two after a packaged reboot | Long sleeps and broader reliability remain unvalidated |
-| Lid-open wake | Working in recorded cycles with the EC helper and Thunderbolt workaround | **17–18 seconds on October 13; earlier cycles were about 13 seconds** |
+| Touch Bar after sleep | Experimental #47 recovered display/Fn without the hook in five observed cycles, including one on the ACPI trial kernel | Long-sleep display recovery and broader reliability remain unvalidated |
+| Lid-open wake | About **1 second** in one attended ACPI-kernel cycle; previously 17–18 seconds | Repeat fast-wake tests after fresh boots and on battery remain outstanding |
 | USB-C/Thunderbolt controllers after sleep | Driver bindings recovered in recorded undocked cycles | External port functionality and docked sleep are unvalidated |
-| Battery retention with lid closed | **Unresolved; battery ran flat over a couple of days** | Missed suspend, unexpected wake and sleep power draw have not been distinguished |
+| Battery retention with lid closed | **Severe depletion across about five hours of confirmed suspend** | Device cause, precise sleep power and wake trigger remain unknown; emergency hibernation did not record completion |
 | Camera | Detected by the driver | Capture untested here |
 | Touch ID, Bluetooth and ambient light sensor | Not validated here | No fingerprint packages or PAM changes were part of this setup |
 
@@ -37,14 +36,16 @@ about **17.5 seconds in noirq device resume**, largely two Thunderbolt bridge
 callbacks at about 8.6–8.9 seconds each. A later diagnostic counted 200,160
 ACPI mailbox reads to host bridge `00:00.0`, supporting the wrong-address
 mechanism described in [kernel PR #544](https://github.com/omacom/omarchy-pkgs/pull/544).
-Its correction has not been tested here. Earlier traces measured about 12.67
-seconds in that phase. These measure different intervals from visible wake
-and should not be added together. See [the evidence and chronology](docs/findings.md).
+A separately named build of the same kernel with that correction passed the
+October 14 attended wake test. No new per-bridge timing or corrected-address
+trace was captured. Earlier traces measured about 12.67 seconds in that phase.
+These measure different intervals from visible wake and should not be added
+together. See [the evidence and chronology](docs/findings.md).
 
 The sleep helper **refuses suspend while external USB devices, Thunderbolt
 devices or displays are attached**. Disconnect them before a lid test; a direct
 charger is permitted. A refused suspend can leave the laptop awake with its lid
-closed. Until battery retention is measured, shut down for long unplugged
+closed. Until battery retention is fixed and validated, shut down for long unplugged
 periods and transport.
 
 ## Start here
@@ -60,8 +61,8 @@ periods and transport.
    log commands.
 
 The [October review](docs/review.md) records an audio-source ownership repair,
-installer hardening, the touchpad review, wake experiments still needing an
-attended test, and [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894).
+installer hardening, the touchpad review, wake experiments and their remaining
+validation, and [draft Omarchy PR #14894](https://github.com/omacom/omarchy/pull/14894).
 The existing draft contains the earlier combined proposal. Separate keyboard,
 sleep and dependent Touch Bar contributions are now prepared locally, with a
 companion keyboard packaging change. New submissions are held until the full
@@ -104,6 +105,13 @@ The loaded module identity was verified after a full reboot. Startup and the
 two subsequent lid-sleep cycles passed with the separate unpark hook
 disabled; visible wake took about 18 seconds. The original signed package and
 boot image are retained for rollback.
+
+On October 14, the separately named `7.2.5-3-omarchy-acpi-trial` kernel booted
+with the same #47 driver. Startup and one attended lid cycle passed; the owner
+reported about one second to illumination with Touch Bar/Fn working. The
+original kernel remains installed as a fallback. The October 15 battery
+depletion happened on this trial kernel; faster wake does not establish lower
+sleep power.
 
 ## Projects that made this possible
 

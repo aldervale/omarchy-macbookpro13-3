@@ -4,6 +4,47 @@ This chronology summarizes our local repair notes and the owner's observations.
 It contains no raw journals, machine identifiers, restore transcripts or
 firmware. Times are approximate where the owner reported them.
 
+## Update: fast wake and severe battery depletion, October 14–19
+
+The separately named `7.2.5-3-omarchy-acpi-trial` build carries the ACPICA
+address-derivation correction from
+[omarchy-pkgs #544](https://github.com/omacom/omarchy-pkgs/pull/544), using the
+same kernel baseline and PR #47 Touch Bar driver as the preceding tests.
+The original kernel remains installed as a fallback.
+
+After booting the trial on October 14, the owner confirmed startup illumination
+and Fn. The attended 30-second lid cycle that evening resumed successfully,
+with the owner reporting **about one second to illumination and everything
+working**. Controller cleanup ran without the separate userspace unpark hook.
+This is the fifth directly observed #47 display/Fn recovery, and the first on
+the corrected kernel. It is one fast-wake observation, not repeated validation.
+No new per-bridge timing or corrected mailbox-address trace was captured.
+
+On October 19 the owner reported finding the battery flat after about four
+days unplugged with the lid closed. Saved journals and battery history narrow
+the depletion to October 15; times below are Pacific daylight time:
+
+| Time | Evidence |
+| --- | --- |
+| 06:43:09 | Last charge-percentage sample before sleep: 97.94% |
+| 08:01:17–18 | Lid closed; guarded preparation succeeded; kernel entered `s2idle`; battery history still reported fully charged |
+| 13:08:12 | Returned from suspend after about 5 hours 7 minutes, without a recorded lid-open event; battery reported 0% and 9.751 V |
+| 13:08:32–34 | UPower requested `suspend-then-hibernate`; userspace froze; the journal ends without confirmed hibernation or orderly shutdown |
+
+There are no intervening full resumes in the saved journal. This strongly
+supports severe battery depletion during the closed-lid suspend interval.
+It does not identify the device drawing power, the wake trigger or what
+happened after the last record. The 17.844 W sample shortly after resume is
+an **awake** reading, not a sleep-power measurement. A controlled test with
+charge/energy readings immediately before and after sleep is still needed.
+
+The installed controller preparation/recovery hooks apply only to
+`systemd-suspend.service`, not the emergency `suspend-then-hibernate` or
+hibernate services. That is a compatibility gap to resolve and test; it does
+not prove why the emergency action failed to record completion, since the
+battery already reported 0%. No sleep policy was changed during this review.
+Shut down for long unplugged periods until battery retention is fixed.
+
 ## Update: Touch Bar recovery confirmed, October 9
 
 The earlier dark-after-resume limitation below is superseded for the tested
@@ -163,18 +204,20 @@ This instrumented cycle slept for 25.561 seconds. The two bridge callbacks took
 8.883304 and 8.768498 seconds; total noirq resume was 17.859020 seconds and
 ordinary device resume was 0.531384 seconds. Instrumentation can add overhead,
 so this is diagnostic evidence, not a precise speed comparison. The trace was
-removed and prior logging settings restored. The current kernel and sleep
-workaround remain unchanged; a separate patched-kernel trial is being prepared.
+removed and prior logging settings restored. At that point the original kernel
+and sleep workaround were unchanged; the subsequent patched-kernel result is
+recorded in the October 14–19 update above.
 
 ## What remains to prove
 
 | Question | Current evidence | Required next measurement |
 | --- | --- | --- |
 | Does lid opening reliably wake it? | Several recorded successes and owner follow-up | Repeated cycles after fresh boots, on mains and battery |
-| How fast is visible wake? | Latest owner estimates 17–18 seconds; earlier 10–15 seconds | Consistent timing across power conditions and fresh boots |
-| Why is wake still slow? | Two bridge callbacks dominate; 200,160 mailbox reads hit the host bridge | Test the targeted ACPICA correction and verify correct addresses and faster resume |
-| Can the display hook be retired? | Four observed #47 recoveries with it disabled, two after a packaged reboot | Broader repeated/long-sleep validation and upstream driver delivery |
-| Is closed-lid power use acceptable? | Battery depletion over multiple days | Undocked charge/energy snapshots plus proven suspend/wake intervals |
+| How fast is visible wake? | About 1 second in one ACPI-trial test; previously 17–18 seconds | Consistent timing across power conditions and fresh boots |
+| Does the correction remove the bridge delay? | Old kernel: 200,160 wrong-address reads; corrected kernel: one visibly faster wake | Verify corrected addresses and per-bridge timing on the trial kernel |
+| Can the display hook be retired? | Five observed #47 recoveries with it disabled, including one on the ACPI trial | Broader repeated/long-sleep validation and upstream driver delivery |
+| Is closed-lid power use acceptable? | No: nearly full to 0% across about five hours of confirmed suspend | Controlled undocked charge/energy snapshots and device power-state investigation |
+| Is critical-battery handling safe? | Emergency suspend-then-hibernate bypasses the MacBook hooks; completion unconfirmed | A compatible, tested critical-power action and recovery path |
 | Do external ports work after wake? | Controllers remain bound | Functional USB-C, display and Thunderbolt tests |
 | Does it work while docked? | Current helper deliberately refuses that suspend | A separate docked policy and hardware tests |
 
