@@ -154,9 +154,14 @@ Three source/packaging failures remain on that unchanged baseline:
 
 These results use `omarchy-pkgs` at `7aa7343` and `omarchy-iso` at `4f4b3e3`. No tests or ownership checks were disabled to obtain a passing result. The full suite is **not green**, and complete full-suite runs on each final atomic branch remain a submission gate after resolving the baseline issues. Packaging builds and their required CI checks also remain gates; the existing draft has no reported CI checks, which does not establish passing tests.
 
-The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot, followed by one successful cycle on the ACPI trial kernel; this is separate from the Omarchy installer tests. That latest attended cycle took about one second to illumination, per the owner. Repeated fast-wake testing, extended typing and port functionality after wake remain outstanding; operation remains undocked-only.
+The underlying hardware sequence has the recorded physical results; the new split installation still needs an attended installation/removal test. The original display hook is retained on disk and disabled for the #47 comparison. The local #47 package passed startup and two sleep/recovery cycles after a full reboot, followed by two successful cycles on separate boots of the ACPI trial kernel; this is separate from the Omarchy installer tests. Both ACPI trials woke in about one second, per the owner; the second included 15 minutes asleep on battery. Broader repeated testing, extended typing and port functionality after wake remain outstanding; operation remains undocked-only.
 
 Saved history reviewed October 19 shows severe battery depletion across about five hours of confirmed closed-lid suspend on October 15. The emergency suspend-then-hibernate path bypasses the installed MacBook hooks and has no recorded completion. Battery retention and compatible critical-power handling are unresolved hardware gates. No improved battery result is claimed.
+
+The October 20 short battery test confirmed successful sleep/recovery but did
+not isolate sleep consumption: charge readings changed sharply after wake,
+and the ending manual snapshot included awake time and recharging. Automatic
+sampling through the settling period is needed before claiming a drain rate.
 
 A subsequent read-only mailbox trace counted 200,160 ACPI PCI reads at offset
 `0x530`, all targeting host bridge `00:00.0`. This supports the address-derivation

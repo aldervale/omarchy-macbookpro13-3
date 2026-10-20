@@ -4,6 +4,34 @@ This chronology summarizes our local repair notes and the owner's observations.
 It contains no raw journals, machine identifiers, restore transcripts or
 firmware. Times are approximate where the owner reported them.
 
+## Update: second fast wake; battery measurement inconclusive, October 20
+
+On a different boot of the same ACPI trial kernel and PR #47 driver, the owner
+closed the lid on battery for 15 minutes, opened without pressing keys and
+reported nearly immediate wake with Touch Bar/Fn working. Kernel suspend
+counters advanced from zero to one success with zero failures. The difference
+between elapsed boot time and elapsed monotonic time was 908.5 seconds asleep.
+Both Thunderbolt and both USB-C controller driver bindings recovered, and
+`pm_async` returned to 1. No userspace unpark was used. This is the second
+fast-wake observation and sixth directly observed #47 display/Fn recovery.
+
+The last charge-history sample before sleep was 94.62% at 08:41:07 PDT.
+Suspend preparation began at 08:41:36; the first sample after wake was 93.76%
+at 08:56:49. That apparent 0.85-percentage-point difference is **not a reliable
+isolated sleep-consumption measurement**: the first resume sample reported
+zero instantaneous power, and charge readings subsequently dropped to 89.85%
+within 40 seconds and 88.95% within 70 seconds. Readings also changed sharply
+just after unplugging before the test. Delayed gauge updates or recalculation
+are possible; this test does not establish the cause.
+
+The final manual snapshot at 09:02:40 included about 6.6 minutes awake across
+the before/after interval, and charging was already recorded by 09:01:48.
+Its raw charge difference must not be divided by the sleep duration to claim
+sleep power. The 22–30 W history samples after wake describe awake operation.
+The next test needs automatic sampling before sleep and through the post-wake
+settling period, with the charger disconnected throughout. The earlier severe
+long-sleep battery depletion remains unresolved.
+
 ## Update: fast wake and severe battery depletion, October 14–19
 
 The separately named `7.2.5-3-omarchy-acpi-trial` build carries the ACPICA
@@ -213,9 +241,9 @@ recorded in the October 14–19 update above.
 | Question | Current evidence | Required next measurement |
 | --- | --- | --- |
 | Does lid opening reliably wake it? | Several recorded successes and owner follow-up | Repeated cycles after fresh boots, on mains and battery |
-| How fast is visible wake? | About 1 second in one ACPI-trial test; previously 17–18 seconds | Consistent timing across power conditions and fresh boots |
-| Does the correction remove the bridge delay? | Old kernel: 200,160 wrong-address reads; corrected kernel: one visibly faster wake | Verify corrected addresses and per-bridge timing on the trial kernel |
-| Can the display hook be retired? | Five observed #47 recoveries with it disabled, including one on the ACPI trial | Broader repeated/long-sleep validation and upstream driver delivery |
+| How fast is visible wake? | About 1 second in two ACPI-trial tests on separate boots, including 15 minutes on battery; previously 17–18 seconds | Broader repeated testing |
+| Does the correction remove the bridge delay? | Old kernel: 200,160 wrong-address reads; corrected kernel: two visibly faster wakes | Verify corrected addresses and per-bridge timing on the trial kernel |
+| Can the display hook be retired? | Six observed #47 recoveries with it disabled, including two on the ACPI trial | Broader repeated/long-sleep validation and upstream driver delivery |
 | Is closed-lid power use acceptable? | No: nearly full to 0% across about five hours of confirmed suspend | Controlled undocked charge/energy snapshots and device power-state investigation |
 | Is critical-battery handling safe? | Emergency suspend-then-hibernate bypasses the MacBook hooks; completion unconfirmed | A compatible, tested critical-power action and recovery path |
 | Do external ports work after wake? | Controllers remain bound | Functional USB-C, display and Thunderbolt tests |
